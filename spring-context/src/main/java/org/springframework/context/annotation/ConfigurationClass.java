@@ -211,6 +211,9 @@ final class ConfigurationClass {
 
 	public void validate(ProblemReporter problemReporter) {
 		// A configuration class may not be final (CGLIB limitation) unless it declares proxyBeanMethods=false
+		/**
+		 * 验证Configuration是否需要代理
+		 */
 		Map<String, Object> attributes = this.metadata.getAnnotationAttributes(Configuration.class.getName());
 		if (attributes != null && (Boolean) attributes.get("proxyBeanMethods")) {
 			if (this.metadata.isFinal()) {

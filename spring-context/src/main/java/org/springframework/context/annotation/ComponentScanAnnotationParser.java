@@ -74,6 +74,9 @@ class ComponentScanAnnotationParser {
 
 
 	public Set<BeanDefinitionHolder> parse(AnnotationAttributes componentScan, final String declaringClass) {
+		/**
+		 * 重新创建了一个ClassPathBeanDefinitionScanner,Spring并没有用最开始的对象，我也搞不懂,可能不好获取吧
+		 */
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(this.registry,
 				componentScan.getBoolean("useDefaultFilters"), this.environment, this.resourceLoader);
 
@@ -92,12 +95,13 @@ class ComponentScanAnnotationParser {
 		}
 
 		scanner.setResourcePattern(componentScan.getString("resourcePattern"));
-
+         //includeFilters加进scanner对象中方便之后解析
 		for (AnnotationAttributes filter : componentScan.getAnnotationArray("includeFilters")) {
 			for (TypeFilter typeFilter : typeFiltersFor(filter)) {
 				scanner.addIncludeFilter(typeFilter);
 			}
 		}
+		//excludeFilters加进scanner对象中方便之后解析
 		for (AnnotationAttributes filter : componentScan.getAnnotationArray("excludeFilters")) {
 			for (TypeFilter typeFilter : typeFiltersFor(filter)) {
 				scanner.addExcludeFilter(typeFilter);
@@ -129,6 +133,7 @@ class ComponentScanAnnotationParser {
 				return declaringClass.equals(className);
 			}
 		});
+		//真正开始扫描
 		return scanner.doScan(StringUtils.toStringArray(basePackages));
 	}
 

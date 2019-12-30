@@ -109,6 +109,10 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * @see #refresh
 	 */
 	public GenericApplicationContext() {
+		/**
+		 * 调用父类(AbstractApplicationContext)的空构造方法生成PathMatchingResourcePatternResolver
+		 */
+		super();
 		this.beanFactory = new DefaultListableBeanFactory();
 	}
 

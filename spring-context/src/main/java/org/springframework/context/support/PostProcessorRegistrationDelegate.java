@@ -57,7 +57,11 @@ final class PostProcessorRegistrationDelegate {
 
 		// Invoke BeanDefinitionRegistryPostProcessors first, if any.
 		Set<String> processedBeans = new HashSet<>();
-
+		/**
+		 * 操作外界传入BeanFactoryPostProcessor对象,如果对象是BeanDefinitionRegistryPostProcessor,执行
+		 * postProcessBeanDefinitionRegistry方法,并放入registryProcessors列表中,直接放入regularPostProcessors
+		 * 列表中
+		 */
 		if (beanFactory instanceof BeanDefinitionRegistry) {
 			BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
 			List<BeanFactoryPostProcessor> regularPostProcessors = new ArrayList<>();
@@ -67,7 +71,12 @@ final class PostProcessorRegistrationDelegate {
 				if (postProcessor instanceof BeanDefinitionRegistryPostProcessor) {
 					BeanDefinitionRegistryPostProcessor registryProcessor =
 							(BeanDefinitionRegistryPostProcessor) postProcessor;
+					//执行BeanDefinitionRegistryPostProcessor
 					registryProcessor.postProcessBeanDefinitionRegistry(registry);
+					/**
+					 * 为了可以执行BeanFactoryPostProcessor,
+					 * 	因为BeanDefinitionRegistryPostProcessor是BeanFactoryPostProcessor子类
+					 */
 					registryProcessors.add(registryProcessor);
 				}
 				else {
@@ -82,16 +91,23 @@ final class PostProcessorRegistrationDelegate {
 			List<BeanDefinitionRegistryPostProcessor> currentRegistryProcessors = new ArrayList<>();
 
 			// First, invoke the BeanDefinitionRegistryPostProcessors that implement PriorityOrdered.
+			/**
+			 * 获取所有的BeanDefinitionRegistryPostProcessor
+			 */
 			String[] postProcessorNames =
 					beanFactory.getBeanNamesForType(BeanDefinitionRegistryPostProcessor.class, true, false);
 			for (String ppName : postProcessorNames) {
+				//如果是PriorityOrdered
 				if (beanFactory.isTypeMatch(ppName, PriorityOrdered.class)) {
+					//加入俩个list中
 					currentRegistryProcessors.add(beanFactory.getBean(ppName, BeanDefinitionRegistryPostProcessor.class));
 					processedBeans.add(ppName);
 				}
 			}
+			//排序
 			sortPostProcessors(currentRegistryProcessors, beanFactory);
 			registryProcessors.addAll(currentRegistryProcessors);
+			//执行，currentRegistryProcessors中只有一个类ConfigurationClassPostProccessor
 			invokeBeanDefinitionRegistryPostProcessors(currentRegistryProcessors, registry);
 			currentRegistryProcessors.clear();
 
